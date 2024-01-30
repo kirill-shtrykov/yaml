@@ -100,23 +100,34 @@ func AddResolvers(tag string, fn func(*yaml.Node) (*yaml.Node, error)) {
 	tagResolvers[tag] = fn
 }
 
-func toVars(vars []string) map[string]string {
-	attrs := make(map[string]string, len(vars))
+// Parse string argemnts like "key=value" to variables map
+func parseArgs(args []string) map[string]string {
+	vars := make(map[string]string, len(args))
 	for _, arg := range vars {
 		parts := strings.SplitN(arg, "=", 2)
 		if len(parts) == 2 {
-			attrs[parts[0]] = parts[1]
+			vars[parts[0]] = parts[1]
 		}
 	}
 
-	return attrs
+	return vars
 }
 
-func Load(r io.Reader, v interface{}, vars []string) error {
-	argv = toVars(vars)
+// Set custom variables to global map
+func SetArgv(vars map[string]string) {
+	argv = vars
+}
+
+// Wrapper for original yaml.Unmarshal with custom tag processor
+func Unmarshal(in []byte, out interface{}) error {
+	return yaml.Unmarshal(in, &CustomTagProcessor{out})
+}
+
+func Load(r io.Reader, v interface{}, args []string) error {
+	SetArgv(parseArgs(args))
 	buf := bytes.NewBuffer(nil)
 	io.Copy(buf, r)
-	err := yaml.Unmarshal(buf.Bytes(), &CustomTagProcessor{v})
+	err := Unmarshal(buf.Bytes(), &CustomTagProcessor{v})
 	return err
 }
 
