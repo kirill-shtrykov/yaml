@@ -103,7 +103,7 @@ func AddResolvers(tag string, fn func(*yaml.Node) (*yaml.Node, error)) {
 // Parse string argemnts like "key=value" to variables map
 func parseArgs(args []string) map[string]string {
 	vars := make(map[string]string, len(args))
-	for _, arg := range vars {
+	for _, arg := range args {
 		parts := strings.SplitN(arg, "=", 2)
 		if len(parts) == 2 {
 			vars[parts[0]] = parts[1]
@@ -127,7 +127,7 @@ func Load(r io.Reader, v interface{}, args []string) error {
 	SetArgv(parseArgs(args))
 	buf := bytes.NewBuffer(nil)
 	io.Copy(buf, r)
-	err := Unmarshal(buf.Bytes(), &CustomTagProcessor{v})
+	err := Unmarshal(buf.Bytes(), v)
 	return err
 }
 
