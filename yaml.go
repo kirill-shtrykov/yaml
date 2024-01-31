@@ -36,7 +36,7 @@ func (i *CustomTagProcessor) UnmarshalYAML(value *yaml.Node) error {
 	if err != nil {
 		return err
 	}
-	return resolved.Decode(i.target)
+	return resolved.Decode(&i.target)
 }
 
 func resolveTags(node *yaml.Node) (*yaml.Node, error) {
